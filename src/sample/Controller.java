@@ -38,19 +38,30 @@ public class Controller implements Initializable {
     @FXML
     private TableColumn<Student, String> phone;
 
+
+    @FXML
+    private TableView<StudentMark> marksTable;
+    @FXML
+    private TableColumn<StudentMark, String> marksTable_name;
+    @FXML
+    private TableColumn<StudentMark, String> marksTable_surname;
+    @FXML
+    private TableColumn<StudentMark, Integer> marksTable_mark;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) { //uzkraunamas pirmas preis parodant vartotojui
 
         id.setCellValueFactory(new PropertyValueFactory<Student, Integer>("id"));
         name.setCellValueFactory(new PropertyValueFactory<Student, String>("name"));
-       surname.setCellValueFactory(new PropertyValueFactory<Student, String>("surname"));
+        surname.setCellValueFactory(new PropertyValueFactory<Student, String>("surname"));
         phone.setCellValueFactory(new PropertyValueFactory<Student, String>("phone"));
         email.setCellValueFactory(new PropertyValueFactory<Student, String>("email"));
 
+        marksTable_name.setCellValueFactory(new PropertyValueFactory<StudentMark, String>("name"));
+        marksTable_surname.setCellValueFactory(new PropertyValueFactory<StudentMark, String>("surname"));
+        marksTable_mark.setCellValueFactory(new PropertyValueFactory<StudentMark, Integer>("mark"));
 
         Connection connection = MyConnectionHandler.getConnection();
-
-        pullDateFromDb(connection);
 
         if(connection != null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -61,6 +72,20 @@ public class Controller implements Initializable {
             alert.setContentText("Prisijungti prie duomenu bazes nepavyko");
             alert.show();
         }
+
+        createTables(connection);
+
+
+        try {
+            Statement statemant  = connection.createStatement();
+            statemant.executeUpdate("UPDATE students set name ='Jolita' where id=1");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        pullDateFromDb(connection);
+        pullStudnetMarks(connection);
 
     }
     //metodas, kuris isrenka studentus is duomenu bazes
@@ -86,7 +111,43 @@ public class Controller implements Initializable {
         }
     }
 
+    private void pullStudnetMarks(Connection connection) {
+        if (connection != null) {
+            try {
+                Statement st = connection.createStatement(); //kad butu ivykdyta query
+                ResultSet resultSet = st.executeQuery("SELECT name, surname, mark FROM students JOIN student_marks_laukai ON students.ID = student_marks_laukai.Students_ID where mark < 5"); //paleidinejami query
 
+                List<StudentMark> studentMarks = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    studentMarks.add(new StudentMark(
+                            resultSet.getString("name"),
+                            resultSet.getString("surname"),
+                            resultSet.getInt("mark")
+                    ));
+                }
+
+                marksTable.setItems(FXCollections.observableList(studentMarks));
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void createTables (Connection connection) {
+        if(QueryUtils.isTableExist(connection, "students")) {
+            System.out.println("Lentele students egzistuoja");
+        } else {
+            System.out.println("Lentele students neegzistuoja");
+        }
+        if(QueryUtils.isTableExist(connection, "studentsMarks")) {
+            System.out.println("Lentele studentsMarks egzistuoja");
+        } else {
+            System.out.println("Lentele studentsMarks neegzistuoja");
+
+        }
+    }
 
 
     /*private void createDummyDate() {

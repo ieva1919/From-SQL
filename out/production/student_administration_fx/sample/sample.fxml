@@ -26,6 +26,13 @@
                   <TableColumn fx:id="email" prefWidth="113.0" text="EMAIL" />
               </columns>
             </TableView>
+            <TableView fx:id="marksTable" layoutX="25.0" layoutY="290.0" prefHeight="144.0" prefWidth="491.0">
+              <columns>
+                <TableColumn fx:id="marksTable_name" prefWidth="75.0" text="Name" />
+                <TableColumn fx:id="marksTable_surname" prefWidth="75.0" text="Surname" />
+                  <TableColumn fx:id="marksTable_mark" prefWidth="75.0" text="Mark" />
+              </columns>
+            </TableView>
          </children>
       </Pane>
    </children>
